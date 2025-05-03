@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:13
+    container_name: postgres_fastapi
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: reminder_app
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "6433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/pgdata
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: fastapi_app
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost/reminder_app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+
+volumes:
+  pgdata:
